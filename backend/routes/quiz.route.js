@@ -8,6 +8,6 @@ router.get('/quiz', getAllQuizzes)
 router.get('/quiz/:id', getQuizById)
 router.put('/quiz/:id', authenticate, updateQuiz)
 router.delete('/quiz/:id', authenticate, deleteQuiz)
-router.post('/quiz/:id', authenticate, uploadQuiz)
+router.post('/quiz', authenticate, uploadQuiz)
 
 export default router

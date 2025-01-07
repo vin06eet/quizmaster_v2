@@ -73,7 +73,7 @@ const uploadQuiz = async (req, res)=>{
         const allowedDifficulties = ["Easy", "Medium", "Hard"]
         if(difficultyLevel && !allowedDifficulties.includes(difficultyLevel))
             return res.status(400).json({message: "Difficulty level should be one of the following: Easy, Medium, Hard"})
-        const createdBy = req.params.id
+        const createdBy = req.user.id
         const newQuiz = new Quiz({
             title,
             description,
