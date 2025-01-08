@@ -93,4 +93,10 @@ const uploadQuiz = async (req, res)=>{
     }
 }
 
-export {getAllQuizzes, getQuizById, updateQuiz, deleteQuiz, uploadQuiz}
+export {
+    getAllQuizzes,
+    getQuizById,
+    updateQuiz,
+    deleteQuiz,
+    uploadQuiz
+}

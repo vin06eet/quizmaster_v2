@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 import connectDB from "./config/db.js"
 import bodyParser from "body-parser"
+import cookieParser from "cookie-parser"
 import authRoute from "./routes/auth.route.js"
 import userRoute from "./routes/user.route.js"
 import quizRoute from "./routes/quiz.route.js"
@@ -10,6 +11,7 @@ dotenv.config()
 const app = express()
 
 app.use(bodyParser.json())
+app.use(cookieParser())
 
 connectDB()
 

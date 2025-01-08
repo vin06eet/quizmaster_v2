@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import User from '../models/user.model.js'
 
 const authenticate = async (req, res, next) => {
-    const token = req.header('Authorization')?.replace('Bearer', '').trim()
+    const token = req.cookies.token
     if(!token)
         return res.status(400).json({message: "Access Denied"})
     try {

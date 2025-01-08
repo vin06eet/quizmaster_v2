@@ -44,4 +44,9 @@ const displayAllUser = async (req, res)=>{
     }
 }
 
-export {getUser, updateUser, deleteUser, displayAllUser}
+export {
+    getUser,
+    updateUser,
+    deleteUser,
+    displayAllUser
+}
