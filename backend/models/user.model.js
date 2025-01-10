@@ -16,7 +16,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    quizzes: [{
+    quizzesCreated: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Quiz'
+    }],
+    quizzesAttempted: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz'
     }]

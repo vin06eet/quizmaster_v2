@@ -49,7 +49,7 @@ const login = async (req, res) => {
     }
 }
 
-const logout = async ()=>{
+const logout = async (req, res)=>{
     try {
         res.clearCookie('token')
         res.status(200).json({message: 'Logged out successfully'})
