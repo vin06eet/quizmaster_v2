@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser"
 import authRoute from "./routes/auth.route.js"
 import userRoute from "./routes/user.route.js"
 import quizRoute from "./routes/quiz.route.js"
+import uploadRoute from "./routes/upload.route.js"
 
 dotenv.config()
 const app = express()
@@ -18,6 +19,7 @@ connectDB()
 app.use('/api', authRoute)
 app.use('/api', userRoute)
 app.use('/api', quizRoute)
+app.use('/api', uploadRoute)
 
 const PORT = process.env.PORT || 6000
 
