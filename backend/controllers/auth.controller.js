@@ -1,6 +1,7 @@
 import User from '../models/user.model.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import { validateEmail, validatePassword } from '../utils/validate.utils.js'
 
 const register = async (req, res) => {
     try {
@@ -9,12 +10,20 @@ const register = async (req, res) => {
             email,
             password
         } = req.body
-        if(!username)
-            return res.status(400).json({message: "user is required"})
+        if(!username||!email||!password)
+            return res.status(400).json({message: "all fields are required"})
         const existingUser  = await User.findOne({ username });
         if (existingUser)
             return res.status(400).json({ error: "Username already exists" });
-        const user = new User({username, email, password})
+        const existingEmail = await User.findOne({email})
+        if(existingEmail)
+            return res.status(400).json({message: 'Email already exists'})
+        const emailCorrect = validateEmail(email)
+        const passwordCorrect = validatePassword(password)
+        if(!emailCorrect)
+            return res.status(400).json({message: 'Invalid email'})
+        if(!passwordCorrect)
+            return res.status(400).json({message: 'Password must be at least 8 characters'})
         await user.save()
         res.status(201).json({
             message: "User created successfully",

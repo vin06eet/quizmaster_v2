@@ -147,6 +147,9 @@ const attemptQuiz = async (req, res)=>{
         const quiz = await Quiz.findById(quizID);
         if (!quiz)
             return res.status(404).json({ message: "Quiz not found" });
+        const isPublic = quiz.public
+        if(!isPublic)
+            return res.status(404).json({error: "Quiz is not public"});
         const quizDetails = {
             title: quiz.title,
             description: quiz.description,
@@ -171,19 +174,21 @@ const submitQuiz = async (req, res) => {
         const userID = req.user._id;
         const answers = req.body.answers; 
 
-        if (!mongoose.Types.ObjectId.isValid(quizID) || !mongoose.Types.ObjectId.isValid(userID)) {
+        if (!mongoose.Types.ObjectId.isValid(quizID) || !mongoose.Types.ObjectId.isValid(userID))
             return res.status(400).json({ error: 'Invalid quiz ID or user ID' });
-        }
+        
 
         const quiz = await Quiz.findById(quizID);
-        if (!quiz) {
+        if (!quiz)
             return res.status(404).json({ message: "Quiz not found" });
-        }
+        
+        const isPublic = quiz.public
+        if(!isPublic)
+            return res.status(404).json({error: "Quiz is not public"});
 
-        if (!Array.isArray(answers) || answers.length !== quiz.questions.length) {
+        if (!Array.isArray(answers) || answers.length !== quiz.questions.length)
             return res.status(400).json({ error: 'Invalid number of answers provided' });
-        }
-
+        
         const attemptDetails = {
             title: quiz.title,
             description: quiz.description,
