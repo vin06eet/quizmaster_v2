@@ -55,57 +55,87 @@ const deleteQuiz = async (req, res)=>{
     }
 }
 
-//works fine
 const uploadQuiz = async (req, res)=>{
     try {
-        const {
-            title,
-            description,
-            questions,
-            time,
-            marks,
-            difficultyLevel,
-            attemptedBy
-        } = req.body;
-
-        if(!title||!questions)
-            return res.status(400).json({message: "Title , questions and marks are required"})
-
-        if(!Array.isArray(questions)||questions.length === 0)
-            return res.status(400).json({message: "Questions should be as a non-empty array"})
-        
-        for(const ques of questions){
-            if(!ques.question||!ques.options||!ques.answer||!ques.marks)
-                return res.status(400).json({message: "Question, options and answer are required"})
-            if(!Array.isArray(ques.options)||ques.options.length <=2 )
-                return res.status(400).json({message: "Options should be as an array with atleast two options"})
-            if(!ques.options.includes(ques.answer))
-                return res.status(400).json({message: "Answer should be in options"})
-        }
-        
-        const allowedDifficulties = ["Easy", "Medium", "Hard"]
-        if(difficultyLevel && !allowedDifficulties.includes(difficultyLevel))
-            return res.status(400).json({message: "Difficulty level should be one of the following: Easy, Medium, Hard"})
+        const {quizData} = req
+        if(!quizData || !quizData.title || !quizData.questions)
+            return res.status(400).json({message: "Invalid quiz data"})
         const newQuiz = new Quiz({
-            title,
-            description,
-            questions,
-            time: time||240,
-            difficultyLevel: difficultyLevel||"Easy",
+            title: quizData.title,
+            description: quizData.description || '',
+            questions: quizData.questions.map(question => ({
+                question: question.question,
+                options: question.options,
+                answer: question.answer || 'a',
+                marks: 1 // Default marks for each question
+            })),
+            time: 240, // Default time
+            difficultyLevel: "Easy", // Default difficulty level
             attemptedBy: []
         })
-        const savedQuiz = await newQuiz.save();
+        const savedQuiz = await newQuiz.save()
         const user = await User.findById(req.user._id)
-        if (!user)
-            return res.status(404).json({ error: 'User  not found' })
+        if(!user)
+            return res.status(404).json({error: 'user not found'})
         user.quizzesCreated.push(savedQuiz._id.toString())
         await user.save()
-        res.status(200).json({savedQuiz})
-        console.log(savedQuiz._id.toString())
+        res.status(200).json({message: "Quiz uploaded successfully"})
     } catch (error) {
         res.status(500).json({error: error.message})
     }
 }
+
+//works fine
+// const uploadQuiz = async (req, res)=>{
+//     try {
+//         const {
+//             title,
+//             description,
+//             questions,
+//             time,
+//             marks,
+//             difficultyLevel,
+//             attemptedBy
+//         } = req.body;
+
+//         if(!title||!questions)
+//             return res.status(400).json({message: "Title , questions and marks are required"})
+
+//         if(!Array.isArray(questions)||questions.length === 0)
+//             return res.status(400).json({message: "Questions should be as a non-empty array"})
+        
+//         for(const ques of questions){
+//             if(!ques.question||!ques.options||!ques.answer||!ques.marks)
+//                 return res.status(400).json({message: "Question, options and answer are required"})
+//             if(!Array.isArray(ques.options)||ques.options.length <=2 )
+//                 return res.status(400).json({message: "Options should be as an array with atleast two options"})
+//             if(!ques.options.includes(ques.answer))
+//                 return res.status(400).json({message: "Answer should be in options"})
+//         }
+        
+//         const allowedDifficulties = ["Easy", "Medium", "Hard"]
+//         if(difficultyLevel && !allowedDifficulties.includes(difficultyLevel))
+//             return res.status(400).json({message: "Difficulty level should be one of the following: Easy, Medium, Hard"})
+//         const newQuiz = new Quiz({
+//             title,
+//             description,
+//             questions,
+//             time: time||240,
+//             difficultyLevel: difficultyLevel||"Easy",
+//             attemptedBy: []
+//         })
+//         const savedQuiz = await newQuiz.save();
+//         const user = await User.findById(req.user._id)
+//         if (!user)
+//             return res.status(404).json({ error: 'User  not found' })
+//         user.quizzesCreated.push(savedQuiz._id.toString())
+//         await user.save()
+//         res.status(200).json({savedQuiz})
+//         console.log(savedQuiz._id.toString())
+//     } catch (error) {
+//         res.status(500).json({error: error.message})
+//     }
+// }
 
 //works fine
 const attemptQuiz = async (req, res)=>{
