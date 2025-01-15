@@ -1,6 +1,6 @@
 import express from 'express'
 import authenticate from '../middlewares/auth.middleware.js'
-import { getAllQuizzes, getQuizById, updateQuiz, deleteQuiz, uploadQuiz, attemptQuiz, submitQuiz } from '../controllers/quiz.controller.js'
+import { getAllQuizzes, getQuizById, updateQuiz, deleteQuiz, uploadQuiz, attemptQuiz, submitQuiz, getAttempt, getAllAttempts } from '../controllers/quiz.controller.js'
 
 const router = express.Router()
 
@@ -11,5 +11,7 @@ router.delete('/quiz/:id', authenticate, deleteQuiz)
 router.post('/quiz', authenticate, uploadQuiz)
 router.get('/quiz/attempt/:id', authenticate, attemptQuiz)
 router.post('/quiz/attempt/:id', authenticate, submitQuiz)
+router.get('/quiz/attempt/:id', authenticate, getAttempt)
+router.get('/quiz/attempt', authenticate, getAllAttempts)
 
 export default router

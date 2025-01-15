@@ -231,6 +231,38 @@ const submitQuiz = async (req, res) => {
     }
 };
 
+const getAttempt = async (req, res) =>{
+    try {
+        const userID = req.user._id
+        const quizID = req.params.id
+        const quiz = attemptQuiz.findById(quizID)
+        const user = User.findById(userID)
+        if(!user.quizzesAttempted.findOne(quizID))
+            return res.status(400).json({error: "You have not attempted this quiz"})
+        if(!quiz)
+            return res.status(400).json({error: 'Quiz not found'})
+        res.status(200).json({quiz})
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+const getAllAttempts = async (req, res) => {
+    try {
+        const userID = req.user._id; 
+        const user = await User.findById(userID).populate('quizzesAttempted');
+        if (!user)
+            return res.status(404).json({ message: "User  not found" });
+        const quizzes = user.quizzesCreated;
+        if (!quizzes || quizzes.length === 0)
+            return res.status(404).json({ message: "No quizzes found for this user" });
+        res.status(200).json({ quizzes });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 export {
     getAllQuizzes,
     getQuizById,
@@ -238,6 +270,8 @@ export {
     deleteQuiz,
     uploadQuiz,
     attemptQuiz,
-    submitQuiz
+    submitQuiz,
+    getAttempt,
+    getAllAttempts
 }
 
