@@ -24,6 +24,11 @@ const register = async (req, res) => {
             return res.status(400).json({message: 'Invalid email'})
         if(!passwordCorrect)
             return res.status(400).json({message: 'Password must be at least 8 characters'})
+        const user = await User({
+            username,
+            email,
+            password
+        })
         await user.save()
         res.status(201).json({
             message: "User created successfully",

@@ -147,7 +147,7 @@ const attemptQuiz = async (req, res)=>{
         const quiz = await Quiz.findById(quizID);
         if (!quiz)
             return res.status(404).json({ message: "Quiz not found" });
-        const isPublic = quiz.public
+        const isPublic = quiz.Public
         if(!isPublic)
             return res.status(404).json({error: "Quiz is not public"});
         const quizDetails = {
@@ -182,7 +182,7 @@ const submitQuiz = async (req, res) => {
         if (!quiz)
             return res.status(404).json({ message: "Quiz not found" });
         
-        const isPublic = quiz.public
+        const isPublic = quiz.Public
         if(!isPublic)
             return res.status(404).json({error: "Quiz is not public"});
 

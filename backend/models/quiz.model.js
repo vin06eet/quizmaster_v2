@@ -37,7 +37,7 @@ const quizSchema = new mongoose.Schema({
     },
     Public: {
         type: Boolean,
-        default: false
+        default: true
     },
     attemptedBy: [{
         type: mongoose.Schema.Types.ObjectId,
