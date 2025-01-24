@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const attemptSchema = new mongoose.Schema({
+    isCompleted: {
+        type: Boolean,
+        default: false
+    },
     title: {
         type: mongoose.Schema.Types.String,
         ref: 'Quiz'
@@ -10,6 +14,10 @@ const attemptSchema = new mongoose.Schema({
         ref: 'Quiz'
     },
     questions: [{
+        questionNumber: {
+            type: mongoose.Schema.Types.String,
+            ref: 'Quiz'
+        },
         question: {
             type: mongoose.Schema.Types.String,
             ref: 'Quiz'

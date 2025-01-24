@@ -7,6 +7,7 @@ import authenticate from '../middlewares/auth.middleware.js';
 import { uploadImage } from '../middlewares/fileUpload.middleware.js';
 const router = express.Router()
 
+//works fine
 router.post('/upload', upload.single('file'), uploadImage , uploadAndOcr, geminiApi, authenticate, uploadQuiz)
 
 export default router

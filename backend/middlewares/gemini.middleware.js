@@ -11,6 +11,7 @@ const geminiApi = async (req, res, next)=>{
     "description": "<Insert a brief description>",
     "questions": [
       {
+        "questionNumber": "<The question number which you will increment after each question>",
         "question": "<The text of the question>",
         "options": [
           "<Option 1>",

@@ -43,6 +43,7 @@ const updateQuiz = async (req, res)=>{
     }
 }
 
+
 //works fine
 const deleteQuiz = async (req, res)=>{
     try {
@@ -64,6 +65,7 @@ const uploadQuiz = async (req, res)=>{
             title: quizData.title,
             description: quizData.description || '',
             questions: quizData.questions.map(question => ({
+                questionNumber: question.questionNumber,
                 question: question.question,
                 options: question.options,
                 answer: question.answer || 'a',
@@ -161,6 +163,7 @@ const attemptQuiz = async (req, res)=>{
             time: quiz.time,
             difficultyLevel: quiz.difficultyLevel
         };
+        
         res.status(200).json(quizDetails);
     } catch (error) {
         res.status(500).json({error: error.message})
@@ -262,6 +265,134 @@ const getAllAttempts = async (req, res) => {
     }
 };
 
+const getAllPublicQuizzes = async (req, res)=>{
+    try {
+        const quizzes = await Quiz.find({Public: true}).populate('questions');
+        if(!quizzes || quizzes.length === 0)
+            res.status(404).json({message: "No public quizzes found"})
+        res.status(200).json({quizzes})
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+const createAttempt = async (req, res)=>{
+    try {
+        const userID = req.user._id
+        const quizID = req.params.id
+        const user = await User.findById(userID)
+        if (!mongoose.Types.ObjectId.isValid(quizID))
+            return res.status(400).json({ error: 'Invalid quiz ID' })
+        const quiz = await Quiz.findById(quizID)
+        if(!user)
+            return res.status(400).json({error: 'user not found'})
+        if(!quiz)
+            return res.status(400).json({error: 'Quiz not found'})
+        const isPublic = quiz.Public
+        if(!isPublic)
+            return res.status(404).json({error: 'Quiz is not public'});
+        const quizDetails = {
+            title: quiz.title,
+            description: quiz.description,
+            questions: quiz.questions.map(question => ({
+                questionNumber: question.questionNumber,
+                question: question.question,
+                options: question.options,
+                marks: question.marks
+            })),
+            time: quiz.time,
+            difficultyLevel: quiz.difficultyLevel
+        };
+        
+        const createdAttempt = new Attempt(quizDetails)
+        await createdAttempt.save()
+
+        quiz.attempts.push(createdAttempt._id)
+        quiz.attemptedBy.push(userID)
+        await quiz.save()
+
+        user.quizzesAttempted.push(createdAttempt._id)
+        await user.save()
+
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+const saveQuestion = async (req, res)=>{
+    try {
+        const quizID = req.params.id
+        const userID = req.user._id
+        const user = await User.findById(userID)
+        if (!mongoose.Types.ObjectId.isValid(quizID))
+            return res.status(400).json({ error: 'Invalid quiz ID' })
+        const quiz = await Attempt.findById(quizID)
+        if(!user)
+            return res.status(400).json({error: 'user not found'})
+        if(!quiz)
+            return res.status(400).json({error: 'Quiz not found'})
+        const {questionNumber, answer} = req.body
+        if(!questionNumber||!answer)
+            return res.status(400).json({message: 'both question number and answer are required'})
+        const result = await Attempt.updateOne({
+            _id: quizID,
+            'questions.questionNumber': questionNumber
+        },
+        {
+            $set: {
+                'questions.$.markedOption': answer
+            }
+        })
+        if(result.nModified === 0)
+            return res.status(404).json({ error: 'Attempt or question not found' })
+        res.status(200).json({message: 'Question saved successfully'})
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+const saveQuizAttempt = async (req, res)=>{
+    try {
+        const quizID = req.params.id
+        const {parentQuizId} = req.body
+        if (!mongoose.Types.ObjectId.isValid(quizID) || !mongoose.Types.ObjectId.isValid(parentQuizId))
+            return res.status(400).json({ error: 'Invalid quiz ID or parent Quiz ID' });
+        const attempt = await Attempt.findById(quizID)
+        const parentQuiz = await Quiz.findById(parentQuizId)
+        if(!attempt)
+            return res.status(404).json({error: 'attempt not found'})
+        let totalMarks = 0;
+        attempt.questions.forEach(question => {
+            const correspondingQuestion = parentQuiz.questions.find(
+                (q) => q.questionNumber.toString() === question.questionNumber.toString()
+            )
+            const correctAnswer = correspondingQuestion.answer
+            
+            if(question.markedOption){
+                if (question.markedOption === correctAnswer) {
+                    question.isCorrect = true;
+                    question.score = 1; 
+                } else {
+                    question.isCorrect = false;
+                    question.score = 0;
+                }
+            }
+            else{
+                question.isCorrect = false;
+                question.score = 0;
+            }
+            totalMarks += question.score; 
+        });
+        attempt.totalMarks = totalMarks;
+        await attempt.save()
+        res.status(200).json({
+            message: 'Total marks calculated and updated successfully',
+            totalMarks,
+        });
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
 
 export {
     getAllQuizzes,
@@ -272,6 +403,10 @@ export {
     attemptQuiz,
     submitQuiz,
     getAttempt,
-    getAllAttempts
+    getAllAttempts,
+    getAllPublicQuizzes,
+    saveQuestion,
+    saveQuizAttempt,
+    createAttempt
 }
 
